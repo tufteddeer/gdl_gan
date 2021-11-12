@@ -107,7 +107,7 @@ gan.generator.summary()
 
 #%%
 
-EPOCHS = 2#6000
+EPOCHS = 6000
 PRINT_EVERY_N_BATCHES = 20
 N_CRITIC = 5
 BATCH_SIZE = 64
