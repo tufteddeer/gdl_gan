@@ -93,7 +93,7 @@ class GAN():
 
         discriminator_output = Dense(1, activation="sigmoid", kernel_initializer=weight_init)(x)
 
-        self.discriminator = Model(discriminator_input, discriminator_output)
+        self.discriminator = Model(discriminator_input, discriminator_output, name="discriminator")
         self.discriminator.summary()
 
     def _build_generator(self):
