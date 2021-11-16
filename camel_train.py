@@ -39,7 +39,7 @@ mode =  'build' #'load' #
 
 #%%
 
-(x_train, y_train) = load_safari(DATA_NAME)
+x_train = load_safari()
 
 #%%
 
@@ -48,6 +48,7 @@ x_train.shape
 #%%
 
 plt.imshow(x_train[200,:,:,0], cmap = 'gray')
+plt.show()
 
 #%% md
 
