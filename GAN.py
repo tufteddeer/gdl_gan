@@ -1,5 +1,4 @@
 import os
-import pickle as pkl
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,12 +13,6 @@ from tensorflow.keras.utils import plot_model
 class GAN():
     def __init__(self
                  , input_dim
-                 , discriminator_conv_filters
-                 , discriminator_conv_kernel_size
-                 , discriminator_conv_strides
-                 , discriminator_batch_norm_momentum
-                 , discriminator_activation
-                 , discriminator_dropout_rate
                  , discriminator_learning_rate
                  , generator_initial_dense_layer_size
                  , generator_upsample
@@ -37,12 +30,6 @@ class GAN():
         self.name = 'gan'
 
         self.input_dim = input_dim
-        self.discriminator_conv_filters = discriminator_conv_filters
-        self.discriminator_conv_kernel_size = discriminator_conv_kernel_size
-        self.discriminator_conv_strides = discriminator_conv_strides
-        self.discriminator_batch_norm_momentum = discriminator_batch_norm_momentum
-        self.discriminator_activation = discriminator_activation
-        self.discriminator_dropout_rate = discriminator_dropout_rate
         self.discriminator_learning_rate = discriminator_learning_rate
 
         self.generator_initial_dense_layer_size = generator_initial_dense_layer_size
@@ -58,7 +45,6 @@ class GAN():
         self.optimiser = optimiser
         self.z_dim = z_dim
 
-        self.n_layers_discriminator = len(discriminator_conv_filters)
         self.n_layers_generator = len(generator_conv_filters)
 
         self.weight_init = RandomNormal(mean=0., stddev=0.02)
@@ -81,36 +67,34 @@ class GAN():
         return layer
 
     def _build_discriminator(self):
-
-        ### THE discriminator
-        discriminator_input = Input(shape=self.input_dim, name='discriminator_input')
+        weight_init = RandomNormal(mean=0., stddev=0.02)
+        dropout_rate = 0.4
+        discriminator_input = Input((28, 28, 1), name="discriminator_input")
 
         x = discriminator_input
 
-        for i in range(self.n_layers_discriminator):
+        x = Conv2D(64, 5, strides=2, activation='relu', padding="same", kernel_initializer=weight_init, name="d_conv_0")(x)
+        x = Activation('relu', name="d_act_0")(x)
+        x = Dropout(dropout_rate, name="d_drop_0")(x)
 
-            x = Conv2D(
-                filters=self.discriminator_conv_filters[i]
-                , kernel_size=self.discriminator_conv_kernel_size[i]
-                , strides=self.discriminator_conv_strides[i]
-                , padding='same'
-                , name='discriminator_conv_' + str(i)
-                , kernel_initializer=self.weight_init
-            )(x)
+        x = Conv2D(64, 5, strides=2, activation='relu', padding="same", kernel_initializer=weight_init, name="d_conv_1")(x)
+        x = Activation('relu', name="d_act_1")(x)
+        x = Dropout(dropout_rate, name="d_drop_1")(x)
 
-            if self.discriminator_batch_norm_momentum and i > 0:
-                x = BatchNormalization(momentum=self.discriminator_batch_norm_momentum)(x)
+        x = Conv2D(128, 5, strides=2, activation='relu', padding="same", kernel_initializer=weight_init, name="d_conv_2")(x)
+        x = Activation('relu', name="d_act_2")(x)
+        x = Dropout(dropout_rate, name="d_drop_2")(x)
 
-            x = self.get_activation(self.discriminator_activation)(x)
-
-            if self.discriminator_dropout_rate:
-                x = Dropout(rate=self.discriminator_dropout_rate)(x)
+        x = Conv2D(128, 5, strides=1, activation='relu', padding="same", kernel_initializer=weight_init, name="d_conv_3")(x)
+        x = Activation('relu', name="d_act_3")(x)
+        x = Dropout(dropout_rate, name="d_drop_3")(x)
 
         x = Flatten()(x)
 
-        discriminator_output = Dense(1, activation='sigmoid', kernel_initializer=self.weight_init)(x)
+        discriminator_output = Dense(1, activation="sigmoid", kernel_initializer=weight_init)(x)
 
         self.discriminator = Model(discriminator_input, discriminator_output)
+        self.discriminator.summary()
 
     def _build_generator(self):
 
@@ -287,33 +271,6 @@ class GAN():
                    show_layer_names=True)
         plot_model(self.generator, to_file=os.path.join(run_folder, 'viz/generator.png'), show_shapes=True,
                    show_layer_names=True)
-
-    def save(self, folder):
-
-        with open(os.path.join(folder, 'params.pkl'), 'wb') as f:
-            pkl.dump([
-                self.input_dim
-                , self.discriminator_conv_filters
-                , self.discriminator_conv_kernel_size
-                , self.discriminator_conv_strides
-                , self.discriminator_batch_norm_momentum
-                , self.discriminator_activation
-                , self.discriminator_dropout_rate
-                , self.discriminator_learning_rate
-                , self.generator_initial_dense_layer_size
-                , self.generator_upsample
-                , self.generator_conv_filters
-                , self.generator_conv_kernel_size
-                , self.generator_conv_strides
-                , self.generator_batch_norm_momentum
-                , self.generator_activation
-                , self.generator_dropout_rate
-                , self.generator_learning_rate
-                , self.optimiser
-                , self.z_dim
-            ], f)
-
-        self.plot_model(folder)
 
     def save_model(self, run_folder):
         self.model.save(os.path.join(run_folder, 'model.h5'))
