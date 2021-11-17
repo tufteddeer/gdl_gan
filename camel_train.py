@@ -27,14 +27,6 @@ plt.show()
 
 gan = GAN(input_dim=(28, 28, 1)
           , discriminator_learning_rate=0.0008
-          , generator_initial_dense_layer_size=(7, 7, 64)
-          , generator_upsample=[2, 2, 1, 1]
-          , generator_conv_filters=[128, 64, 64, 1]
-          , generator_conv_kernel_size=[5, 5, 5, 5]
-          , generator_conv_strides=[1, 1, 1, 1]
-          , generator_batch_norm_momentum=0.9
-          , generator_activation='relu'
-          , generator_dropout_rate=None
           , generator_learning_rate=0.0004
           , optimiser='rmsprop'
           , z_dim=100

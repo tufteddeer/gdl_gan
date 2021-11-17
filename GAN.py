@@ -14,14 +14,6 @@ class GAN():
     def __init__(self
                  , input_dim
                  , discriminator_learning_rate
-                 , generator_initial_dense_layer_size
-                 , generator_upsample
-                 , generator_conv_filters
-                 , generator_conv_kernel_size
-                 , generator_conv_strides
-                 , generator_batch_norm_momentum
-                 , generator_activation
-                 , generator_dropout_rate
                  , generator_learning_rate
                  , optimiser
                  , z_dim
@@ -31,21 +23,10 @@ class GAN():
 
         self.input_dim = input_dim
         self.discriminator_learning_rate = discriminator_learning_rate
-
-        self.generator_initial_dense_layer_size = generator_initial_dense_layer_size
-        self.generator_upsample = generator_upsample
-        self.generator_conv_filters = generator_conv_filters
-        self.generator_conv_kernel_size = generator_conv_kernel_size
-        self.generator_conv_strides = generator_conv_strides
-        self.generator_batch_norm_momentum = generator_batch_norm_momentum
-        self.generator_activation = generator_activation
-        self.generator_dropout_rate = generator_dropout_rate
         self.generator_learning_rate = generator_learning_rate
 
         self.optimiser = optimiser
         self.z_dim = z_dim
-
-        self.n_layers_generator = len(generator_conv_filters)
 
         self.weight_init = RandomNormal(mean=0., stddev=0.02)
 
@@ -67,92 +48,84 @@ class GAN():
         return layer
 
     def _build_discriminator(self):
-        weight_init = RandomNormal(mean=0., stddev=0.02)
         dropout_rate = 0.4
         discriminator_input = Input((28, 28, 1), name="discriminator_input")
 
         x = discriminator_input
 
-        x = Conv2D(64, 5, strides=2, activation='relu', padding="same", kernel_initializer=weight_init, name="d_conv_0")(x)
+        x = Conv2D(64, 5, strides=2, activation='relu', padding="same", kernel_initializer=self.weight_init, name="d_conv_0")(x)
         x = Activation('relu', name="d_act_0")(x)
         x = Dropout(dropout_rate, name="d_drop_0")(x)
 
-        x = Conv2D(64, 5, strides=2, activation='relu', padding="same", kernel_initializer=weight_init, name="d_conv_1")(x)
+        x = Conv2D(64, 5, strides=2, activation='relu', padding="same", kernel_initializer=self.weight_init, name="d_conv_1")(x)
         x = Activation('relu', name="d_act_1")(x)
         x = Dropout(dropout_rate, name="d_drop_1")(x)
 
-        x = Conv2D(128, 5, strides=2, activation='relu', padding="same", kernel_initializer=weight_init, name="d_conv_2")(x)
+        x = Conv2D(128, 5, strides=2, activation='relu', padding="same", kernel_initializer=self.weight_init, name="d_conv_2")(x)
         x = Activation('relu', name="d_act_2")(x)
         x = Dropout(dropout_rate, name="d_drop_2")(x)
 
-        x = Conv2D(128, 5, strides=1, activation='relu', padding="same", kernel_initializer=weight_init, name="d_conv_3")(x)
+        x = Conv2D(128, 5, strides=1, activation='relu', padding="same", kernel_initializer=self.weight_init, name="d_conv_3")(x)
         x = Activation('relu', name="d_act_3")(x)
         x = Dropout(dropout_rate, name="d_drop_3")(x)
 
         x = Flatten()(x)
 
-        discriminator_output = Dense(1, activation="sigmoid", kernel_initializer=weight_init)(x)
+        discriminator_output = Dense(1, activation="sigmoid", kernel_initializer=self.weight_init, name="d_dense_0")(x)
 
         self.discriminator = Model(discriminator_input, discriminator_output, name="discriminator")
         self.discriminator.summary()
 
     def _build_generator(self):
 
-        ### THE generator
-
         generator_input = Input(shape=(self.z_dim,), name='generator_input')
 
         x = generator_input
+        x = Dense(np.prod((7, 7, 64)), kernel_initializer=self.weight_init, name="g_dense_0")(x)
 
-        x = Dense(np.prod(self.generator_initial_dense_layer_size), kernel_initializer=self.weight_init)(x)
+        x = BatchNormalization(momentum=0.9)(x)
 
-        if self.generator_batch_norm_momentum:
-            x = BatchNormalization(momentum=self.generator_batch_norm_momentum)(x)
+        x = Activation('relu')(x)
 
-        x = self.get_activation(self.generator_activation)(x)
+        x = Reshape((7, 7, 64))(x)
 
-        x = Reshape(self.generator_initial_dense_layer_size)(x)
+        # no dropout
 
-        if self.generator_dropout_rate:
-            x = Dropout(rate=self.generator_dropout_rate)(x)
+        # 0th pack
+        # upsampling = 2
+        x = UpSampling2D()(x)
 
-        for i in range(self.n_layers_generator):
+        x = Conv2D(filters=128, kernel_size=5, padding='same', strides=1, kernel_initializer=self.weight_init, name="g_conv_0")(x)
 
-            if self.generator_upsample[i] == 2:
-                x = UpSampling2D()(x)
-                x = Conv2D(
-                    filters=self.generator_conv_filters[i]
-                    , kernel_size=self.generator_conv_kernel_size[i]
-                    , padding='same'
-                    , name='generator_conv_' + str(i)
-                    , kernel_initializer=self.weight_init
-                )(x)
-            else:
+        x = BatchNormalization(momentum=0.9)(x)
 
-                x = Conv2DTranspose(
-                    filters=self.generator_conv_filters[i]
-                    , kernel_size=self.generator_conv_kernel_size[i]
-                    , padding='same'
-                    , strides=self.generator_conv_strides[i]
-                    , name='generator_conv_' + str(i)
-                    , kernel_initializer=self.weight_init
-                )(x)
+        x = Activation('relu')(x)
 
-            if i < self.n_layers_generator - 1:
+        # 1st pack
+        # upsampling = 2
+        x = UpSampling2D()(x)
 
-                if self.generator_batch_norm_momentum:
-                    x = BatchNormalization(momentum=self.generator_batch_norm_momentum)(x)
+        x = Conv2D(filters=64, kernel_size=5, padding='same', strides=1, kernel_initializer=self.weight_init, name="g_conv_1")(x)
 
-                x = self.get_activation(self.generator_activation)(x)
+        x = BatchNormalization(momentum=0.9)(x)
 
+        x = Activation('relu')(x)
 
-            else:
+        # 2nd pack
+        # upsampling = 1
+        x = Conv2DTranspose(filters=64, kernel_size=5, padding='same', strides=1, kernel_initializer=self.weight_init, name="g_conv_2")(x)
+        x = BatchNormalization(momentum=0.9)(x)
+        x = Activation('relu')(x)
 
-                x = Activation('tanh')(x)
+        # 3nd pack
+        # upsampling = 1
+        x = Conv2DTranspose(filters=1, kernel_size=5, padding='same', strides=1, kernel_initializer=self.weight_init, name="g_conv_3")(x)
+        x = Activation('tanh')(x)
 
         generator_output = x
 
-        self.generator = Model(generator_input, generator_output)
+        self.generator = Model(generator_input, generator_output, name="generator")
+        self.generator.summary()
 
     def get_opti(self, lr):
         if self.optimiser == 'adam':
