@@ -20,7 +20,7 @@ if not os.path.exists(RUN_FOLDER):
 
 mode = 'build'  # 'load' #
 
-x_train = load_safari()
+x_train = load_safari('data/camel/camel.npy')
 
 plt.imshow(x_train[200, :, :, 0], cmap='gray')
 plt.show()

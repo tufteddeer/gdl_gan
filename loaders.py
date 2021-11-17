@@ -3,8 +3,8 @@ import numpy as np
 from keras_preprocessing.image import ImageDataGenerator
 
 
-def load_safari():
-    path = "data/camel/camel.npy"
+def load_safari(path):
+
 
     print("Loading camel images from {}".format(path))
     data = np.load(path)
