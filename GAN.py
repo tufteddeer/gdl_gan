@@ -15,7 +15,6 @@ class GAN():
                  , input_dim
                  , discriminator_learning_rate
                  , generator_learning_rate
-                 , optimiser
                  , z_dim
                  ):
 
@@ -24,8 +23,6 @@ class GAN():
         self.input_dim = input_dim
         self.discriminator_learning_rate = discriminator_learning_rate
         self.generator_learning_rate = generator_learning_rate
-
-        self.optimiser = optimiser
         self.z_dim = z_dim
 
         self.weight_init = RandomNormal(mean=0., stddev=0.02)
@@ -39,13 +36,6 @@ class GAN():
         self._build_generator()
 
         self._build_adversarial()
-
-    def get_activation(self, activation):
-        if activation == 'leaky_relu':
-            layer = LeakyReLU(alpha=0.2)
-        else:
-            layer = Activation(activation)
-        return layer
 
     def _build_discriminator(self):
         dropout_rate = 0.4
@@ -127,16 +117,6 @@ class GAN():
         self.generator = Model(generator_input, generator_output, name="generator")
         self.generator.summary()
 
-    def get_opti(self, lr):
-        if self.optimiser == 'adam':
-            opti = Adam(lr=lr, beta_1=0.5)
-        elif self.optimiser == 'rmsprop':
-            opti = RMSprop(lr=lr)
-        else:
-            opti = Adam(lr=lr)
-
-        return opti
-
     def set_trainable(self, m, val):
         m.trainable = val
         for l in m.layers:
@@ -147,7 +127,7 @@ class GAN():
         ### COMPILE DISCRIMINATOR
 
         self.discriminator.compile(
-            optimizer=self.get_opti(self.discriminator_learning_rate)
+            optimizer=RMSprop(self.discriminator_learning_rate)
             , loss='binary_crossentropy'
             , metrics=['accuracy']
         )
@@ -160,7 +140,7 @@ class GAN():
         model_output = self.discriminator(self.generator(model_input))
         self.model = Model(model_input, model_output)
 
-        self.model.compile(optimizer=self.get_opti(self.generator_learning_rate), loss='binary_crossentropy',
+        self.model.compile(optimizer=RMSprop(self.generator_learning_rate), loss='binary_crossentropy',
                            metrics=['accuracy']
                            , experimental_run_tf_function=False
                            )

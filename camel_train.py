@@ -28,7 +28,6 @@ plt.show()
 gan = GAN(input_dim=(28, 28, 1)
           , discriminator_learning_rate=0.0008
           , generator_learning_rate=0.0004
-          , optimiser='rmsprop'
           , z_dim=100
           )
 
