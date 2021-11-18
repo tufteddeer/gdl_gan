@@ -13,7 +13,7 @@ if __name__ == '__main__':
     cnt = 0
     for i in range(rows):
         for j in range(columns):
-            axs[i, j].imshow((images[cnt, :, :, :]), cmap='gray_r')
+            axs[i, j].imshow((images[cnt, :, :, :]), cmap='gray')
             axs[i, j].axis('off')
             cnt += 1
     plt.show()
