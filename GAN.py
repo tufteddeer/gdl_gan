@@ -147,18 +147,13 @@ class GAN():
 
         self.set_trainable(self.discriminator, True)
 
-    def train_discriminator(self, x_train, batch_size, using_generator):
+    def train_discriminator(self, x_train, batch_size):
 
         valid = np.ones((batch_size, 1))
         fake = np.zeros((batch_size, 1))
 
-        if using_generator:
-            true_imgs = next(x_train)[0]
-            if true_imgs.shape[0] != batch_size:
-                true_imgs = next(x_train)[0]
-        else:
-            idx = np.random.randint(0, x_train.shape[0], batch_size)
-            true_imgs = x_train[idx]
+        idx = np.random.randint(0, x_train.shape[0], batch_size)
+        true_imgs = x_train[idx]
 
         noise = np.random.normal(0, 1, (batch_size, self.z_dim))
         gen_imgs = self.generator.predict(noise)
@@ -175,13 +170,11 @@ class GAN():
         noise = np.random.normal(0, 1, (batch_size, self.z_dim))
         return self.model.train_on_batch(noise, valid)
 
-    def train(self, x_train, batch_size, epochs, run_folder
-              , print_every_n_batches=50
-              , using_generator=False):
+    def train(self, x_train, batch_size, epochs, run_folder, print_every_n_batches=50):
 
         for epoch in range(self.epoch, self.epoch + epochs):
 
-            d = self.train_discriminator(x_train, batch_size, using_generator)
+            d = self.train_discriminator(x_train, batch_size)
             g = self.train_generator(batch_size)
 
             print("%d [D loss: (%.3f)(R %.3f, F %.3f)] [D acc: (%.3f)(%.3f, %.3f)] [G loss: %.3f] [G acc: %.3f]" % (
