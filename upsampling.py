@@ -8,7 +8,7 @@ image = np.array([[1, 0, 1, ],
                   [0.5, 0, 0.5, ]])
 
 # Show original image
-plt.imshow(image, cmap='gray')
+plt.imshow(image, cmap='gray', extent=[0, 3, 0, 3])
 plt.title("original 3x3 image")
 plt.show()
 
@@ -22,6 +22,6 @@ upsampled = UpSampling2D(input_shape=(3, 3, 1))(image).numpy()
 upsampled = upsampled.reshape((6, 6))
 
 # Show upsampled image
-plt.imshow(upsampled, cmap='gray')
+plt.imshow(upsampled, cmap='gray', extent=[0, 6, 0, 6])
 plt.title("upsampled 6x6 image")
 plt.show()
