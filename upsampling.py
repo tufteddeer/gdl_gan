@@ -15,7 +15,7 @@ plt.show()
 # Reshape image: 1 sample, 3 rows, 3 columns, 1 channel
 image = image.reshape((1, 3, 3, 1))
 
-# Make prediction with model to get upsampled image
+# Get upsampled image
 upsampled = UpSampling2D(input_shape=(3, 3, 1))(image).numpy()
 
 # Reshape upsampled image to 6x6
