@@ -18,7 +18,6 @@ if not os.path.exists(RUN_FOLDER):
     os.mkdir(os.path.join(RUN_FOLDER, 'images'))
     os.mkdir(os.path.join(RUN_FOLDER, 'weights'))
 
-mode = 'build'  # 'load' #
 
 x_train = load_safari('data/camel/camel.npy')
 
@@ -30,12 +29,6 @@ gan = GAN(input_dim=(28, 28, 1)
           , generator_learning_rate=0.0004
           , z_dim=100
           )
-
-if mode == 'build':
-    pass
-    # gan.save(RUN_FOLDER)
-else:
-    gan.load_weights(os.path.join(RUN_FOLDER, 'weights/weights.h5'))
 
 gan.discriminator.summary()
 

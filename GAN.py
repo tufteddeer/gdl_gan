@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tensorflow.keras.initializers import RandomNormal
 from tensorflow.keras.layers import Input, Conv2D, Flatten, Dense, Conv2DTranspose, Reshape, Activation, \
-    BatchNormalization, LeakyReLU, Dropout, UpSampling2D
+    BatchNormalization, Dropout, UpSampling2D
 from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import Adam, RMSprop
+from tensorflow.keras.optimizers import RMSprop
 from tensorflow.keras.utils import plot_model
 
 
@@ -79,36 +79,26 @@ class GAN():
 
         x = Reshape((7, 7, 64))(x)
 
-        # no dropout
 
-        # 0th pack
-        # upsampling = 2
         x = UpSampling2D()(x)
-
         x = Conv2D(filters=128, kernel_size=5, padding='same', strides=1, kernel_initializer=self.weight_init, name="g_conv_0")(x)
-
         x = BatchNormalization(momentum=0.9)(x)
-
         x = Activation('relu')(x)
 
-        # 1st pack
-        # upsampling = 2
+
         x = UpSampling2D()(x)
+
 
         x = Conv2D(filters=64, kernel_size=5, padding='same', strides=1, kernel_initializer=self.weight_init, name="g_conv_1")(x)
-
         x = BatchNormalization(momentum=0.9)(x)
-
         x = Activation('relu')(x)
 
-        # 2nd pack
-        # upsampling = 1
+
         x = Conv2DTranspose(filters=64, kernel_size=5, padding='same', strides=1, kernel_initializer=self.weight_init, name="g_conv_2")(x)
         x = BatchNormalization(momentum=0.9)(x)
         x = Activation('relu')(x)
 
-        # 3nd pack
-        # upsampling = 1
+
         x = Conv2DTranspose(filters=1, kernel_size=5, padding='same', strides=1, kernel_initializer=self.weight_init, name="g_conv_3")(x)
         x = Activation('tanh')(x)
 
