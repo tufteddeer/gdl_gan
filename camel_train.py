@@ -24,10 +24,10 @@ x_train = load_safari('data/camel/camel.npy')
 plt.imshow(x_train[200, :, :, 0], cmap='gray')
 plt.show()
 
-gan = GAN(input_dim=(28, 28, 1)
-          , discriminator_learning_rate=0.0008
-          , generator_learning_rate=0.0004
-          , z_dim=100
+gan = GAN(input_dim=(28, 28, 1),
+            discriminator_learning_rate=0.0008,
+            generator_learning_rate=0.0004,
+            z_dim=100,
           )
 
 gan.discriminator.summary()
@@ -41,11 +41,11 @@ EPOCHS = 6000
 PRINT_EVERY_N_BATCHES = 5
 
 gan.train(
-    x_train
-    , batch_size=BATCH_SIZE
-    , epochs=EPOCHS
-    , run_folder=RUN_FOLDER
-    , print_every_n_batches=PRINT_EVERY_N_BATCHES
+    x_train,
+    batch_size=BATCH_SIZE,
+    epochs=EPOCHS,
+    run_folder=RUN_FOLDER,
+    print_every_n_batches=PRINT_EVERY_N_BATCHES,
 )
 
 fig = plt.figure()

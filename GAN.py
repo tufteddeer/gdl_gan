@@ -11,11 +11,11 @@ from tensorflow.keras.utils import plot_model
 
 
 class GAN():
-    def __init__(self
-                 , input_dim
-                 , discriminator_learning_rate
-                 , generator_learning_rate
-                 , z_dim
+    def __init__(self,
+                 input_dim,
+                 discriminator_learning_rate,
+                 generator_learning_rate,
+                 z_dim,
                  ):
 
         self.name = 'gan'
@@ -117,9 +117,9 @@ class GAN():
         ### COMPILE DISCRIMINATOR
 
         self.discriminator.compile(
-            optimizer=RMSprop(self.discriminator_learning_rate)
-            , loss='binary_crossentropy'
-            , metrics=['accuracy']
+            optimizer=RMSprop(self.discriminator_learning_rate),
+            loss='binary_crossentropy',
+            metrics=['accuracy']
         )
 
         ### COMPILE THE FULL GAN
