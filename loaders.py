@@ -2,7 +2,7 @@ import os
 import numpy as np
 from keras_preprocessing.image import ImageDataGenerator
 from tensorflow.keras.datasets import cifar100, cifar10
-
+import pickle
 
 def load_safari(path):
     print("Loading camel images from {}".format(path))
@@ -45,3 +45,13 @@ def load_cifar(label, num):
     x_data = (x_data.astype('float32') - 127.5) / 127.5
 
     return x_data, y_data
+
+def load_model(model_class, folder, name):
+    with open(os.path.join(folder, 'params.pkl'), 'rb') as f:
+        params = pickle.load(f)
+
+    model = model_class(*params)
+
+    model.load_weights(os.path.join(folder, 'weights/' + name))
+
+    return model
